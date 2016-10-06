@@ -1,0 +1,65 @@
+export PATH="$PATH:$HOME/opt/activator:/opt/local/bin"
+
+#http://stackoverflow.com/questions/18880024/start-ssh-agent-on-login
+
+SSH_ENV="$HOME/.ssh/environment"
+
+function start_agent {
+    echo "Initialising new SSH agent..."
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    echo succeeded
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+    /usr/bin/ssh-add;
+}
+
+# Source SSH settings, if applicable
+
+if [ -f "${SSH_ENV}" ]; then
+    . "${SSH_ENV}" > /dev/null
+    #ps ${SSH_AGENT_PID} doesn't work under cywgin
+    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+        start_agent;
+    }
+else
+    start_agent;
+fi
+
+alias bundle='nocorrect bundle'
+
+export PATH="$HOME/.bin:$PATH"
+
+# recommended by brew doctor
+export PATH="/usr/local/bin:/opt/chefdk/bin:$PATH"
+
+eval "$(rbenv init - --no-rehash zsh)"
+
+export NVM_DIR=~/.nvm
+
+. $(brew --prefix nvm)/nvm.sh
+
+function ssh_ec2 {
+  if [ -z "$1" ]; then
+    echo "Provide an AWS profile"
+    return
+  fi
+  if [ -z "$2" ]; then
+    echo "Provide a search term"
+    return
+  fi
+
+  if [[ "$1" == sandbox* ]]; then
+    keypair="cloudformation-sandbox.pem"
+  else
+    keypair="cloudformation-prod.pem"
+  fi
+
+  ips=$(aws ec2 describe-instances --profile "$1" --region us-east-1 --filter Name=tag:Name,Values=${2} --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text | tr '\n' ',' | sed 's/,$//')
+
+  ssh_username="$3"
+  if [ -z "$ssh_username" ]; then
+    ssh_username=ubuntu
+  fi
+
+  i2cssh -b -l $ssh_username -Xi=${HOME}/.ssh/${keypair} -m $ips
+}
