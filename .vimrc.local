@@ -1,5 +1,3 @@
 colorscheme vividchalk
 
-let g:rspec_command = 'call Send_to_Tmux("bundle exec rspec {spec}\n")'
-
 autocmd BufRead,BufNewFile *.md setlocal textwidth=0
