@@ -1,3 +1,9 @@
 colorscheme vividchalk
 
 autocmd BufRead,BufNewFile *.md setlocal textwidth=0
+
+" Allow auto formatting for files without @format or @prettier tag
+let g:prettier#autoformat_require_pragma = 0
+
+" Toggle the g:prettier#autoformat setting based on whether a config file can be found in the current directory
+let g:prettier#autoformat_config_present = 1
