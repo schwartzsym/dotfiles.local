@@ -16,3 +16,6 @@ function pes {
   . "$(pipenv --venv)/bin/activate"
 }
 #(pipenv --venv > /dev/null 2>&1) && pes
+#
+
+eval "$(aws-vault --completion-script-zsh)"

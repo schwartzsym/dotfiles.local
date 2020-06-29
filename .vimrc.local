@@ -7,3 +7,6 @@ let g:prettier#autoformat_require_pragma = 0
 
 " Toggle the g:prettier#autoformat setting based on whether a config file can be found in the current directory
 let g:prettier#autoformat_config_present = 1
+
+" Run Black on save
+autocmd BufWritePre *.py execute ':Black'
